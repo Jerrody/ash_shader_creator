@@ -1,6 +1,6 @@
 //! # ash_shader_creator
 //!
-//! c
+//! A library for easy to way automatically create multiple shader stages from the directory path. 
 
 use std::{
     collections::HashMap,
