@@ -160,7 +160,7 @@ fn create_shader_modules(
         .collect();
 
     let files = files_path_buf.iter().map(|path_buf| {
-        File::open(path_buf).unwrap_or_else(|_| panic!("Failed to find spv file at {:?}", path_buf))
+        File::open(path_buf).unwrap_or_else(|_| panic!("Failed to find compiled shader file at {:?}", path_buf))
     });
 
     let shader_code = files.map(|file| {
