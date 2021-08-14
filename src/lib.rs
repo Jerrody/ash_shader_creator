@@ -1,6 +1,6 @@
 //! # ash_shader_creator
 //!
-//! A library for easy to way automatically create multiple shader stages from the directory path. 
+//! A library for easy to way automatically create multiple shader stages from the directory path.
 
 use std::{
     collections::HashMap,
@@ -112,32 +112,24 @@ impl<'a> ShaderStage<'a> {
 
         shader_modules
             .iter()
-            .map(|module| PipelineShaderStageCreateInfo {
-                s_type: StructureType::PIPELINE_SHADER_STAGE_CREATE_INFO,
-                p_next: self.shader_stage_p_next,
-                flags: self.shader_stage_flags,
-                stage: if shader_path
-                    .get(&module)
-                    .unwrap()
-                    .to_str()
-                    .unwrap()
-                    .contains("vert.spv")
-                {
-                    ShaderStageFlags::VERTEX
-                } else if shader_path
-                    .get(&module)
-                    .unwrap()
-                    .to_str()
-                    .unwrap()
-                    .contains("frag.spv")
-                {
-                    ShaderStageFlags::FRAGMENT
-                } else {
-                    panic!("Failed to define shader type!")
-                },
-                module: *module,
-                p_name: self.main_function_name.as_ptr(),
-                p_specialization_info: self.spec_info,
+            .map(|module| {
+                let path = shader_path.get(&module).unwrap().to_str().unwrap();
+
+                PipelineShaderStageCreateInfo {
+                    s_type: StructureType::PIPELINE_SHADER_STAGE_CREATE_INFO,
+                    p_next: self.shader_stage_p_next,
+                    flags: self.shader_stage_flags,
+                    stage: if path.contains("vert.spv") || path.contains(".vs") {
+                        ShaderStageFlags::VERTEX
+                    } else if path.contains("frag.spv") || path.contains(".fs") {
+                        ShaderStageFlags::FRAGMENT
+                    } else {
+                        panic!("Failed to define shader type!")
+                    },
+                    module: *module,
+                    p_name: self.main_function_name.as_ptr(),
+                    p_specialization_info: self.spec_info,
+                }
             })
             .collect()
     }
@@ -154,13 +146,15 @@ fn create_shader_modules(
     let files_path_buf: Vec<PathBuf> = spv_files_dir
         .into_iter()
         .filter(|file_name| {
-            file_name
+            let file_name = file_name
                 .as_ref()
                 .unwrap()
                 .path()
                 .to_str()
                 .unwrap()
-                .contains(".spv")
+                .to_owned();
+
+            file_name.contains(".spv") || file_name.contains(".vs") || file_name.contains(".fs")
         })
         .map(|compiled_shader| compiled_shader.unwrap().path())
         .collect();
