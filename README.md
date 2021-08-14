@@ -16,5 +16,11 @@ let shader_stages_create_info: Vec<PipelineShaderStageCreateInfo> =
 ### What the library can do?
 
 - [x] Supports GLSL
-- [ ] Supports HLSL
+- [x] Supports HLSL
 - [ ] Creating shaders from multiple directories
+
+### Important
+
+For today, library can creates only shader stages from compiled shaders that have:
+- For the GLSL: <file_name>_vert.spv for the vertex shader and <file_name>_frag.spv for the fragment shader.
+- For the HLSL: <file_name>.vs for the vertex shader and <file_name>.fs for the fragment shader.
