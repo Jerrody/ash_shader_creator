@@ -46,7 +46,7 @@ impl<'a> ShaderStage<'a> {
     ///        .with_shader_stage_flags(shader_stage_flags)
     ///        .build();
     /// ```
-    pub fn new(device: &'a ash::Device, dir_path: &'a Path) -> Self {
+    pub fn new(device: &'a Device, dir_path: &'a Path) -> Self {
         Self {
             device,
             dir_path,
