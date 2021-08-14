@@ -114,8 +114,8 @@ impl<'a> ShaderStage<'a> {
             .iter()
             .map(|module| PipelineShaderStageCreateInfo {
                 s_type: StructureType::PIPELINE_SHADER_STAGE_CREATE_INFO,
-                p_next: ptr::null(),
-                flags: PipelineShaderStageCreateFlags::empty(),
+                p_next: self.shader_stage_p_next,
+                flags: self.shader_stage_flags,
                 stage: if shader_path
                     .get(&module)
                     .unwrap()
@@ -137,7 +137,7 @@ impl<'a> ShaderStage<'a> {
                 },
                 module: *module,
                 p_name: self.main_function_name.as_ptr(),
-                p_specialization_info: ptr::null(),
+                p_specialization_info: self.spec_info,
             })
             .collect()
     }
