@@ -3,7 +3,10 @@
 A library for easy to way automatically create multiple shader stages from the directory path.
 
 ```rust
-let shader_stage_instance: Vec<PipelineShaderStageCreateInfo> =
+use ash::Device;
+use std::path::Path;
+
+let shader_stages_create_info: Vec<PipelineShaderStageCreateInfo> =
     ShaderStage::new(&device, &Path::new("example_path/compiled_shaders"))
         .with_shader_stage_flags(shader_stage_flags)
         .build();
