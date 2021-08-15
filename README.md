@@ -1,3 +1,6 @@
+[![](https://img.shields.io/badge/github.com-24292E?style=for-the-badge&logo=github)](https://github.com/Jerrody/ash_shader_creator) ![](https://img.shields.io/tokei/lines/github/Jerrody/ash_shader_creator?style=for-the-badge) ![](https://img.shields.io/github/last-commit/Jerrody/ash_shader_creator?style=for-the-badge) ![](https://img.shields.io/github/license/Jerrody/ash_shader_creator?style=for-the-badge)
+![](https://img.shields.io/github/issues/Jerrody/ash_shader_creator?style=for-the-badge) ![](https://img.shields.io/github/issues-closed/Jerrody/ash_shader_creator?style=for-the-badge) ![](https://img.shields.io/crates/v/ash_shader_creator?label=version&style=for-the-badge)
+
 # ash_shader_creator
 
 A library for easy to way automatically create multiple shader stages from the directory path.
