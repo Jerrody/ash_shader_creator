@@ -52,39 +52,44 @@ impl<'a> ShaderStage<'a> {
             dir_path,
             shader_flags: ShaderModuleCreateFlags::empty(),
             shader_p_next: ptr::null(),
-            main_function_name: CString::new("main").unwrap(),
             shader_stage_flags: PipelineShaderStageCreateFlags::empty(),
             shader_stage_p_next: ptr::null(),
             spec_info: ptr::null(),
+            main_function_name: CString::new("main").unwrap(),
         }
     }
 
-    /// Specify ShaderModuleCreateFlags for the self.shader_flags field.
+    /// Specifies `ShaderModuleCreateFlags` for the `self.shader_flags` field.
     pub fn with_shader_flags(&mut self, shader_flags: ShaderModuleCreateFlags) {
         self.shader_flags = shader_flags;
     }
 
-    /// Specify pointer to the struct for the self.shader_p_next field.
+    /// Specifies `pointer` to the struct for the `self.shader_p_next` field.
     pub fn with_shader_p_next(&mut self, p_next: *const c_void) {
         self.shader_p_next = p_next;
     }
 
-    /// Specify PipelineShaderStageCreateFlags for the self.shader_stage_flags field.
+    /// Specifies `PipelineShaderStageCreateFlags` for the `self.shader_stage_flags` field.
     pub fn with_shader_stage_flags(&mut self, shader_stage_flags: PipelineShaderStageCreateFlags) {
         self.shader_stage_flags = shader_stage_flags;
     }
 
-    /// Specify pointer to the struct for the self.shader_stage_p_next field.
+    /// Specifies `pointer` to the struct for the `self.shader_stage_p_next` field.
     pub fn with_shader_stage_p_next(&mut self, p_next: *const c_void) {
         self.shader_stage_p_next = p_next;
     }
 
-    /// Specify SpecializationInfo for the self.spec_info field.
+    /// Specifies `SpecializationInfo` for the `self.spec_info` field.
     pub fn with_spec_info(&mut self, spec_info: *const SpecializationInfo) {
         self.spec_info = spec_info;
     }
 
-    /// Consumes struct's instance and builds vector of shader stages.
+    /// Specifies `main function name` for the `self.main_function_name` field.
+    pub fn with_main_function_name(&mut self, main_function_name: &str) {
+        self.main_function_name = CString::new(main_function_name).unwrap();
+    }
+
+    /// Consumes struct's `instance` and builds vector of shader stages.
     pub fn build(self) -> Vec<PipelineShaderStageCreateInfo> {
         let shader_modules = create_shader_modules(
             self.device,
