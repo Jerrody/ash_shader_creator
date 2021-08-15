@@ -3,7 +3,7 @@
 A library for easy to way automatically create multiple shader stages from the directory path.
 
 ```rust
-use ash::Device;
+use ash::{Device, PipelineShaderStageCreateFlags, PipelineShaderStageCreateInfo};
 use std::path::Path;
 
 let shader_stage_flags = PipelineShaderStageCreateFlags::RESERVED_2_NV | PipelineShaderStageCreateFlags::ALLOW_VARYING_SUBGROUP_SIZE_EXT;
