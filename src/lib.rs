@@ -13,9 +13,9 @@ use std::{
 
 use ash::{
     vk::{
-        PipelineShaderStageCreateFlags, PipelineShaderStageCreateInfo, ShaderModule,
-        ShaderModuleCreateFlags, ShaderModuleCreateInfo, ShaderStageFlags, SpecializationInfo,
-        StructureType,
+        AllocationCallbacks, PipelineShaderStageCreateFlags, PipelineShaderStageCreateInfo,
+        ShaderModule, ShaderModuleCreateFlags, ShaderModuleCreateInfo, ShaderStageFlags,
+        SpecializationInfo, StructureType,
     },
     Device,
 };
@@ -29,6 +29,7 @@ pub struct ShaderStage<'a> {
     pub shader_stage_flags: PipelineShaderStageCreateFlags,
     pub shader_stage_p_next: *const c_void,
     pub spec_info: *const SpecializationInfo,
+    allocation_callbacks: Option<&'a AllocationCallbacks>,
 }
 
 impl<'a> ShaderStage<'a> {
@@ -36,8 +37,8 @@ impl<'a> ShaderStage<'a> {
     /// Can be customized flags and pointers to structs if it needed.
     /// # Examples
     ///
-    /// ```
-    /// use ash::Device;
+    /// ```rust
+    /// use ash::{Device, PipelineShaderStageCreateFlags, PipelineShaderStageCreateInfo};
     /// use std::path::Path;
     ///
     /// let shader_stage_flags = PipelineShaderStageCreateFlags::RESERVED_2_NV | PipelineShaderStageCreateFlags::ALLOW_VARYING_SUBGROUP_SIZE_EXT;
@@ -56,10 +57,23 @@ impl<'a> ShaderStage<'a> {
             shader_stage_p_next: ptr::null(),
             spec_info: ptr::null(),
             main_function_name: CString::new("main").unwrap(),
+            allocation_callbacks: None,
         }
     }
 
     /// Specifies `ShaderModuleCreateFlags` for the `self.shader_flags` field.
+    /// # Examples
+    ///
+    /// ```rust
+    /// use ash::{Device, ShaderModuleCreateFlags, PipelineShaderStageCreateInfo};
+    /// use std::path::Path;
+    ///
+    /// let shader_flags = ShaderModuleCreateFlags::RESERVED_0_NV;
+    /// let shader_stages_create_info: Vec<PipelineShaderStageCreateInfo> =
+    ///    ShaderStage::new(&device, &Path::new("example_path/compiled_shaders"))
+    ///        .with_shader_stage_flags(shader_flags)
+    ///        .build();
+    /// ```
     pub fn with_shader_flags(&mut self, shader_flags: ShaderModuleCreateFlags) {
         self.shader_flags = shader_flags;
     }
@@ -70,6 +84,18 @@ impl<'a> ShaderStage<'a> {
     }
 
     /// Specifies `PipelineShaderStageCreateFlags` for the `self.shader_stage_flags` field.
+    /// # Examples
+    ///
+    /// ```rust
+    /// use ash::{Device, PipelineShaderStageCreateFlags, PipelineShaderStageCreateInfo};
+    /// use std::path::Path;
+    ///
+    /// let shader_stage_flags = PipelineShaderStageCreateFlags::RESERVED_2_NV | PipelineShaderStageCreateFlags::ALLOW_VARYING_SUBGROUP_SIZE_EXT;
+    /// let shader_stages_create_info: Vec<PipelineShaderStageCreateInfo> =
+    ///    ShaderStage::new(&device, &Path::new("example_path/compiled_shaders"))
+    ///        .with_shader_stage_flags(shader_stage_flags)
+    ///        .build();
+    /// ```
     pub fn with_shader_stage_flags(&mut self, shader_stage_flags: PipelineShaderStageCreateFlags) {
         self.shader_stage_flags = shader_stage_flags;
     }
@@ -85,17 +111,47 @@ impl<'a> ShaderStage<'a> {
     }
 
     /// Specifies `main function name` for the `self.main_function_name` field.
+    /// # Examples
+    ///
+    /// ```rust
+    /// use ash::{Device, PipelineShaderStageCreateInfo};
+    /// use std::path::Path;
+    ///
+    /// let shader_stages_create_info: Vec<PipelineShaderStageCreateInfo> =
+    ///    ShaderStage::new(&device, &Path::new("example_path/compiled_shaders"))
+    ///        .with_main_function_name("my_main_function")
+    ///        .build();
+    /// ```
     pub fn with_main_function_name(&mut self, main_function_name: &str) {
         self.main_function_name = CString::new(main_function_name).unwrap();
     }
 
+    /// Specifies `AllocationCallbacks` for the creating shader modules for the `self.allocation_callbacks` field.
+    pub fn with_allocation_callbacks(
+        &mut self,
+        allocation_callbacks: Option<&'a AllocationCallbacks>,
+    ) {
+        self.allocation_callbacks = allocation_callbacks;
+    }
+
     /// Consumes struct's `instance` and builds vector of shader stages.
+    /// # Examples
+    ///
+    /// ```rust
+    /// use ash::{Device, PipelineShaderStageCreateFlags, PipelineShaderStageCreateInfo};
+    /// use std::path::Path;
+    ///
+    /// let shader_stages_create_info: Vec<PipelineShaderStageCreateInfo> =
+    ///    ShaderStage::new(&device, &Path::new("example_path/compiled_shaders"))
+    ///        .build();
+    /// ```
     pub fn build(self) -> Vec<PipelineShaderStageCreateInfo> {
         let shader_modules = create_shader_modules(
             self.device,
             self.dir_path,
             self.shader_flags,
             self.shader_p_next,
+            self.allocation_callbacks,
         );
 
         let file_paths = read_dir(self.dir_path)
@@ -145,9 +201,10 @@ fn create_shader_modules(
     dir_path: &Path,
     flags: ShaderModuleCreateFlags,
     p_next: *const c_void,
+    allocation_callbacks: Option<&AllocationCallbacks>,
 ) -> Vec<ShaderModule> {
-    let compiled_shader_path =
-        read_dir(dir_path).unwrap_or_else(|_| panic!("Failed to find spv file at {:?}", dir_path));
+    let compiled_shader_path = read_dir(dir_path)
+        .unwrap_or_else(|_| panic!("Failed to read directory path at {:?}", dir_path));
     let files_path_buf: Vec<PathBuf> = compiled_shader_path
         .into_iter()
         .filter(|file_name| {
@@ -165,17 +222,14 @@ fn create_shader_modules(
         .collect();
 
     let files = files_path_buf.iter().map(|path_buf| {
-        File::open(path_buf).unwrap_or_else(|_| panic!("Failed to find compiled shader file at {:?}", path_buf))
+        File::open(path_buf)
+            .unwrap_or_else(|_| panic!("Failed to open compiled shader file at {:?}", path_buf))
     });
 
-    let shader_code = files.map(|file| {
-        file.bytes()
-            .filter_map(|byte| byte.ok())
-            .collect::<Vec<u8>>()
-    });
+    files
+        .map(|file| {
+            let shader_code: Vec<u8> = file.bytes().filter_map(|byte| byte.ok()).collect();
 
-    shader_code
-        .map(|shader_code| {
             let shader_module_create_info = ShaderModuleCreateInfo {
                 s_type: StructureType::SHADER_MODULE_CREATE_INFO,
                 p_next,
@@ -186,7 +240,7 @@ fn create_shader_modules(
 
             unsafe {
                 device
-                    .create_shader_module(&shader_module_create_info, None)
+                    .create_shader_module(&shader_module_create_info, allocation_callbacks)
                     .expect("Failed to create shader module!")
             }
         })
