@@ -146,9 +146,9 @@ fn create_shader_modules(
     flags: ShaderModuleCreateFlags,
     p_next: *const c_void,
 ) -> Vec<ShaderModule> {
-    let spv_files_dir =
+    let compiled_shader_path =
         read_dir(dir_path).unwrap_or_else(|_| panic!("Failed to find spv file at {:?}", dir_path));
-    let files_path_buf: Vec<PathBuf> = spv_files_dir
+    let files_path_buf: Vec<PathBuf> = compiled_shader_path
         .into_iter()
         .filter(|file_name| {
             let file_name = file_name
