@@ -124,9 +124,9 @@ impl<'a> ShaderStage<'a> {
                     s_type: StructureType::PIPELINE_SHADER_STAGE_CREATE_INFO,
                     p_next: self.shader_stage_p_next,
                     flags: self.shader_stage_flags,
-                    stage: if path.contains("vert.spv") || path.contains(".vs") {
+                    stage: if path.contains(".vert.spv") || path.contains(".vs") {
                         ShaderStageFlags::VERTEX
-                    } else if path.contains("frag.spv") || path.contains(".fs") {
+                    } else if path.contains(".frag.spv") || path.contains(".fs") {
                         ShaderStageFlags::FRAGMENT
                     } else {
                         panic!("Failed to define shader type!")
