@@ -22,5 +22,5 @@ let shader_stages_create_info: Vec<PipelineShaderStageCreateInfo> =
 ### Important
 
 For today, library can creates only shader stages from the names of compiled shaders that have:
-- For the GLSL: <file_name>_vert.spv for the vertex shader and <file_name>_frag.spv for the fragment shader.
+- For the GLSL: <file_name>.vert.spv for the vertex shader and <file_name>.frag.spv for the fragment shader.
 - For the HLSL: <file_name>.vs for the vertex shader and <file_name>.fs for the fragment shader.
